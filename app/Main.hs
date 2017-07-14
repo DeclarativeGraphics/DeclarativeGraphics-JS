@@ -9,8 +9,6 @@ import GHCJS.DOM.Node
 
 import Graphics.Rendering.Canvas
 
-import Data.Coerce
-
 main :: IO ()
 main = liftJSM helloMain
 
@@ -19,7 +17,7 @@ helloMain = do
     doc <- currentDocumentUnchecked
     body <- getBodyUnchecked doc
 
-    (canvas :: HTMLCanvasElement) <- coerce <$> createElement doc "canvas"
+    canvas <- uncheckedCastTo HTMLCanvasElement <$> createElement doc "canvas"
 
     appendChild_ body canvas
 
@@ -32,3 +30,12 @@ render = do
 
   fillStyle "rgba(0, 0, 200, 0.5)"
   fillRect 30 30 50 50
+
+  fillText 10 90 "Hello, GHCJS!"
+
+  beginPath
+  moveTo 60 10
+  lineTo 60 70
+  lineTo 70 70
+  closePath
+  stroke
