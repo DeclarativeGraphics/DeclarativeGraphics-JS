@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
 
@@ -11,8 +12,10 @@ import GHCJS.DOM.Element
 import GHCJS.DOM.Node
 import GHCJS.DOM.EventM
 import GHCJS.DOM.GlobalEventHandlers
-import GHCJS.DOM.HTMLHyperlinkElementUtils
+import GHCJS.DOM.HTMLCanvasElement
+import GHCJS.DOM.CanvasRenderingContext2D
 
+import Data.Coerce
 
 main :: IO ()
 main = liftDOM helloMain
@@ -21,32 +24,17 @@ helloMain :: JSM ()
 helloMain = do
     doc <- currentDocumentUnchecked
     body <- getBodyUnchecked doc
-    setInnerHTML body "<h1>Kia ora (Hi)</h1>"
 
-    -- Add a mouse click event handler to the document
-    _ <- on doc click $ do
-        (x, y) <- mouseClientXY
-        newParagraph <- uncheckedCastTo HTMLParagraphElement <$> createElement doc "p"
-        text <- createTextNode doc $ "Click " ++ show (x, y)
-        appendChild_ newParagraph text
-        appendChild_ body newParagraph
+    (canvas :: HTMLCanvasElement) <- coerce <$> createElement doc "canvas"
 
-    -- Make an exit link
-    exitMVar <- liftIO newEmptyMVar
-    exit <- uncheckedCastTo HTMLAnchorElement <$> createElement doc "a"
-    text <- createTextNode doc "Click here to exit"
-    appendChild_ exit text
-    appendChild_ body exit
+    appendChild_ body canvas
 
-    -- Set an href for the link, but use preventDefault to stop it working
-    -- (demonstraights synchronous callbacks into haskell, as preventDefault
-    -- must be called inside the JavaScript event handler function).
-    setHref exit "https://github.com/ghcjs/ghcjs-dom-hello"
-    _ <- on exit click $ preventDefault >> liftIO (putMVar exitMVar ())
+    (ctx :: CanvasRenderingContext2D) <- coerce <$> getContextUnchecked canvas "2d" ([] :: [JSString])
 
-    -- Force all all the lazy JSaddle evaluation to be executed
-    syncPoint
+    setFillStyle ctx "rgb(200, 0, 0)"
+    fillRect ctx 10 10 50 50
 
-    -- Wait until the user clicks exit.
-    liftIO $ takeMVar exitMVar
-    setInnerHTML body "<h1>Ka kite ano (See you later)</h1>"
+    setFillStyle ctx "rgba(0, 0, 200, 0.5)"
+    fillRect ctx 30 30 50 50
+
+    return ()
