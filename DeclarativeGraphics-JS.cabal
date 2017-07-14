@@ -18,8 +18,17 @@ library
   exposed-modules:     Lib
   build-depends:       base >= 4.7 && < 5
                      , jsaddle-dom
+                     , ghcjs-dom
                      , DeclarativeGraphics
   default-language:    Haskell2010
+
+executable main
+    main-is: Main.hs
+    build-depends:     base >=4.2 && <5
+                     , ghcjs-dom
+                     , DeclarativeGraphics-JS
+    hs-source-dirs: app
+    ghc-options: -threaded
 
 test-suite DeclarativeGraphics-JS-test
   type:                exitcode-stdio-1.0
