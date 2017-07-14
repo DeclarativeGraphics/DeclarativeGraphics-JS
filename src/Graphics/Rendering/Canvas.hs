@@ -15,15 +15,21 @@ runCanvas canvas action = do
     ctx <- JS.getContextUnchecked canvas "2d" ([] :: [JS.JSString])
     runReaderT action (coerce ctx :: JS.CanvasRenderingContext2D)
 
+save :: Canvas ()
+save = JS.save =<< ask
+
+restore :: Canvas ()
+restore = JS.restore =<< ask
+
 fillStyle :: String -> Canvas ()
 fillStyle style = do
     ctx <- ask
     JS.setFillStyle ctx style
 
-fillRect :: Float -> Float -> Float -> Float -> Canvas ()
-fillRect x y w h = do
+rect :: Double -> Double -> Double -> Double -> Canvas ()
+rect x y w h = do
     ctx <- ask
-    JS.fillRect ctx x y w h
+    JS.rect ctx x y w h
 
 fillText :: Float -> Float -> String -> Canvas ()
 fillText x y text = do
@@ -39,6 +45,11 @@ closePath = JS.closePath =<< ask
 stroke :: Canvas ()
 stroke = JS.stroke =<< ask
 
+fill :: Canvas ()
+fill = do
+    ctx <- ask
+    JS.fill ctx Nothing
+
 moveTo :: Double -> Double -> Canvas ()
 moveTo x y = do
     ctx <- ask
@@ -48,3 +59,18 @@ lineTo :: Double -> Double -> Canvas ()
 lineTo x y = do
     ctx <- ask
     JS.lineTo ctx x y
+
+arc :: Double -> Double -> Double -> Double -> Double -> Canvas ()
+arc xc yc radius angle1 angle2 = do
+    ctx <- ask
+    JS.arc ctx xc yc radius angle1 angle2 False
+
+quadraticCurveTo :: Double -> Double -> Double -> Double -> Canvas ()
+quadraticCurveTo x1 y1 x2 y2 = do
+    ctx <- ask
+    JS.quadraticCurveTo ctx x1 y1 x2 y2
+
+bezierCurveTo :: Double -> Double -> Double -> Double -> Double -> Double -> Canvas ()
+bezierCurveTo x1 y1 x2 y2 x3 y3 = do
+    ctx <- ask
+    JS.bezierCurveTo ctx x1 y1 x2 y2 x3 y3
